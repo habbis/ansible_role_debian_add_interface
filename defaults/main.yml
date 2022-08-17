@@ -1,2 +1,7 @@
 ---
-# variables
+interface: eth0
+vlan: 22
+ip_address: 192.168.0.2/24
+gateway: 192.168.0.1
+gateway_enable: false
+enable_interface: false

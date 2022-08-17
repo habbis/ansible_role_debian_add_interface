@@ -1,8 +1,37 @@
 ---
-- name: Touch
-  ansible.builtin.file:
-    path: /etc/foo.conf
-    state: touch
-    mode: u+rw,g-wx,o-rwx
-    modification_time: preserve
-    access_time: preserve
+  - name: "insert {{ interface }}.{{ vlan }} line 1"
+    lineinfile:
+      path: /etc/network/interfaces
+      line: "auto {{ interface }}.{{ vlan }}"
+      insertafter: '#--'
+      state: present
+
+  - name: insert line 2
+    lineinfile:
+      path: /etc/network/interfaces
+      line: "iface {{ interface }}.{{ vlan }} inet static"
+      insertafter: "auto {{ interface }}.{{ vlan }}"
+      state: present
+
+  - name: insert line 3
+    lineinfile:
+      path: /etc/network/interfaces
+      line: "address {{ ip_address }}"
+      insertafter: "iface {{ interface }}.{{ vlan }} inet static"
+      state: present
+
+  - name: insert proxy line 4
+    lineinfile:
+      path: /etc/network/interfaces
+      line: "gateway {{ gateway }}"
+      insertafter: "address {{ ip_address }}"
+      state: present
+    when: gateway_enable
+
+  - name: add seperator line 6
+    shell: /usr/bin/echo '#--' >> /etc/network/interfaces
+
+  - name: activiate bridge
+    shell: /usr/sbin/ifup {{ bridge }}
+    when: enable_interface
+
