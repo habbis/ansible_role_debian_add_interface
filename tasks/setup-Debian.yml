@@ -1,10 +1,62 @@
 ---
+  #- name: add seperator line 0
+  #  shell: /usr/bin/echo '#--' >> /etc/network/interfaces
+
+  - name: add seperator line 0
+    lineinfile:
+      path: /etc/network/interfaces
+      line: "#--"
+      insertafter: EOF
+      state: absent
+
+  - name: add seperator line 0.5
+    lineinfile:
+      path: /etc/network/interfaces
+      line: "#--"
+      insertafter: EOF
+      state: present
+
+  # adding interface with static network
+  - name: "insert {{ interface }} line 1"
+    lineinfile:
+      path: /etc/network/interfaces
+      line: "auto {{ interface }}"
+      insertafter: '#--'
+      state: present
+    when: (interface_static_ip)
+
+  - name: insert line 2
+    lineinfile:
+      path: /etc/network/interfaces
+      line: "iface {{ interface }} inet static"
+      insertafter: "auto {{ interface }}"
+      state: present
+    when: (interface_static_ip)
+
+  - name: insert line 3
+    lineinfile:
+      path: /etc/network/interfaces
+      line: "address {{ ip_address }}"
+      insertafter: "iface {{ interface }} inet static"
+      state: present
+    when: (interface_static_ip)
+
+  - name: insert  line 4
+    lineinfile:
+      path: /etc/network/interfaces
+      line: "gateway {{ gateway }}"
+      insertafter: "address {{ ip_address }}"
+      state: present
+    when: (gateway_enable and interface_static_ip)
+
+  # adding vlan interface with static network
   - name: "insert {{ interface }}.{{ vlan }} line 1"
     lineinfile:
       path: /etc/network/interfaces
       line: "auto {{ interface }}.{{ vlan }}"
       insertafter: '#--'
       state: present
+    when: (vlan_interface_static_ip)
 
   - name: insert line 2
     lineinfile:
@@ -12,6 +64,7 @@
       line: "iface {{ interface }}.{{ vlan }} inet static"
       insertafter: "auto {{ interface }}.{{ vlan }}"
       state: present
+    when: (vlan_interface_static_ip)
 
   - name: insert line 3
     lineinfile:
@@ -19,19 +72,111 @@
       line: "address {{ ip_address }}"
       insertafter: "iface {{ interface }}.{{ vlan }} inet static"
       state: present
+    when: (vlan_interface_static_ip)
 
-  - name: insert proxy line 4
+  - name: insert  line 4
     lineinfile:
       path: /etc/network/interfaces
       line: "gateway {{ gateway }}"
       insertafter: "address {{ ip_address }}"
       state: present
-    when: gateway_enable
+    when: (gateway_enable and vlan_interface_static)
 
-  - name: add seperator line 6
-    shell: /usr/bin/echo '#--' >> /etc/network/interfaces
+  # adding  bridge  interface with vlan and static ip
+  - name: insert {{ bridge }} line 1
+    lineinfile:
+      path: /etc/network/interfaces
+      line: auto {{ bridge }}
+      insertafter: '#--'
+      state: present
+    when: (bridge_static_ip)
+
+  - name: insert line 2
+    lineinfile:
+      path: /etc/network/interfaces
+      line: iface {{ bridge }} inet static
+      insertafter: auto {{ bridge }}
+      state: present
+    when: (bridge_static_ip)
+
+  - name: insert line 3
+    lineinfile:
+      path: /etc/network/interfaces
+      line: "address {{ ip_address }}"
+      insertafter: iface {{ bridge }} inet static
+      state: present
+    when: (bridge_static_ip)
+
+  - name: insert  line 4
+    lineinfile:
+      path: /etc/network/interfaces
+      line: "gateway {{ gateway }}"
+      insertafter: "address {{ ip_address }}"
+      state: present
+    when: (gateway_enable and bridge_static_ip)
+
+  - name: insert line 5
+    lineinfile:
+      path: /etc/network/interfaces
+      line: "bridge-ports {{ interface }}.{{ vlan }}"
+      insertafter: "address {{ ip_address }}"
+      state: present
+    when: (bridge_manual)
+
+  # adding manual bridge interface with vlan
+  - name: insert {{ bridge }} line 1
+    lineinfile:
+      path: /etc/network/interfaces
+      line: auto {{ bridge }}
+      insertafter: '#--'
+      state: present
+    when: (bridge_manual)
+
+  - name: insert line 2
+    lineinfile:
+      path: /etc/network/interfaces
+      line: iface {{ bridge }} inet manual
+      insertafter: auto {{ bridge }}
+      state: present
+    when: (bridge_manual)
+
+  - name: insert line 3
+    lineinfile:
+      path: /etc/network/interfaces
+      line: "bridge-ports {{ interface }}.{{ vlan }}"
+      insertafter: iface {{ bridge }} inet manual
+      state: present
+    when: (bridge_manual)
+
+  - name: insert  line 4
+    lineinfile:
+      path: /etc/network/interfaces
+      line: bridge-stp off
+      insertafter: "bridge-ports {{ interface }}.{{ vlan }}"
+      state: present
+    when: (bridge_static_ip or bridge_manual)
+
+  - name: insert line 5
+    lineinfile:
+      path: /etc/network/interfaces
+      line: bridge-fd 0
+      insertafter: bridge-stp off
+      state: present
+    when: (bridge_static_ip or bridge_manual)
+
+  - name: activiate vlan interface
+    shell: "/usr/sbin/ifup {{ interface }}.{{ vlan }}"
+    when: (enable_interface and interface_static_ip)
+
+  - name: activiate vlan interface
+    shell: "/usr/sbin/ifup {{ interface }}.{{ vlan }}"
+    when: (enable_interface and vlan_interface_static_ip)
 
   - name: activiate bridge
     shell: /usr/sbin/ifup {{ bridge }}
-    when: enable_interface
+    when: (enable_interface and bridge_static_ip)
+
+  - name: activiate bridge
+    shell: /usr/sbin/ifup {{ bridge }}
+    when: (enable_interface and bridge_manual)
 

@@ -1,7 +1,19 @@
 ---
 interface: eth0
-vlan: 22
+bridge: test2
+vlan: 222
 ip_address: 192.168.0.2/24
 gateway: 192.168.0.1
+# if using gateway enable
 gateway_enable: false
+# enable if you want to take interface up
 enable_interface: false
+# chooes type of interface to deploy
+# inerface_static ip
+interface_static_ip: false
+# vlan_interface_static ip
+vlan_interface_static_ip: false
+# bridge static ip
+bridge_static_ip: false
+# bridge manual
+bridge_manual: true
