@@ -1,4 +1,4 @@
- ansible_role_debian_add_interface
+ansible_role_debian_add_interface
 =========
 
 
@@ -199,14 +199,14 @@ See [molecule doc](https://molecule.readthedocs.io/en/latest/getting-started.htm
 To change role name in all files in the folder.
 
 ```
-find . -type f -print0 | xargs -0 sed -i "s/ ansible_role_debian_add_interface/new_role/g"
+find . -type f -print0 | xargs -0 sed -i "s/ansible_role_debian_add_interface/new_role/g"
 
 ```
 
 And for macos since apple is special.
 
 ```
-find . -type f -print0 | LC_ALL=C  xargs -0  sed -i "" 's/ ansible_role_debian_add_interface/new_role/g'
+find . -type f -print0 | LC_ALL=C  xargs -0  sed -i "" 's/ansible_role_debian_add_interface/new_role/g'
 ```
 
 Example site.yml
@@ -227,5 +227,5 @@ Example site.yml
     #-  defaults/secrets.yml
 
   roles:
-    - { role: ../ ansible_role_debian_add_interface }
+    - { role: ../ansible_role_debian_add_interface }
 ```
